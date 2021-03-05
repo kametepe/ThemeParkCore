@@ -58,6 +58,7 @@ pipeline{
         stage('Build and Set Dll Version ') {
             steps {
                 echo 'Perform Build'
+				bat "dotnet build --configuration Release /p:Version=1.2.3.4"
             }
         }
         
