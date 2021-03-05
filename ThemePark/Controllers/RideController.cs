@@ -18,7 +18,7 @@ namespace ThemePark.Controllers
 
 
         [HttpGet("rides")]
-        public IEnumerable<Ride> GetAllRides()
+        public List<Ride> GetAllRides()
         {
             return rideService.GetAllRides();
         }

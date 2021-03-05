@@ -1,5 +1,4 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using ThemePark.Controllers;
 using ThemePark.Models;
@@ -7,13 +6,14 @@ using ThemePark.Services.Interfaces;
 using System.Web.Http;
 using System.Web.Http.Results;
 using System.Collections.Generic;
+using Xunit;
 
 namespace ThemePark.Tests
 {
-    [TestClass]
+    
     public class RideControllerTest
     {
-        [TestMethod]
+        [Fact]
         public void GetReturnsRideWithSameId()
         {
             string guid = "80b8aa6b-4dde-4df5-9a40-60d2cd4d0e04";
@@ -25,17 +25,16 @@ namespace ThemePark.Tests
             var controller = new RideController(mockRideService.Object);
 
             // Act
-            IHttpActionResult actionResult = controller.GetRideByID(Guid.Parse(guid));
-            var contentResult = actionResult as OkNegotiatedContentResult<Ride>;
+            var contentResult = controller.GetRideByID(Guid.Parse(guid));
+            
 
-            // Assert
-            Assert.IsNotNull(contentResult);
-            Assert.IsNotNull(contentResult.Content);
-            Assert.AreEqual(Guid.Parse(guid), contentResult.Content.ID);
+            // Assert            
+            Assert.NotNull(contentResult);
+            Assert.Equal(Guid.Parse(guid), contentResult.ID);
         }
 
 
-        [TestMethod]
+        [Fact]
         public void GetAllRidess_ShouldReturnAllRides()
         {             
             // Arrange
@@ -48,13 +47,11 @@ namespace ThemePark.Tests
 
 
         // Act
-        IHttpActionResult actionResult = controller.GetAllRides();
-        var contentResult = actionResult as OkNegotiatedContentResult<List<Ride>>;
-
+        var contentResult = controller.GetAllRides();
+        
         // Assert
-        Assert.IsNotNull(contentResult);
-            Assert.IsNotNull(contentResult.Content);
-            Assert.AreEqual(GetTestRides().Count, contentResult.Content.Count);
+            Assert.NotNull(contentResult);
+         Assert.Equal(GetTestRides().Count, contentResult.Count);
         }
 
     private List<Ride> GetTestRides()
