@@ -1,10 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Moq;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using ThemePark.Domains;
+using ThemePark.Exceptions;
 using ThemePark.Infrastructure;
 using ThemePark.Models;
 using ThemePark.Repositories.Implementations;
+using ThemePark.Tests.Infrasctruture;
 using Xunit;
 
 namespace ThemePark.Tests.Repositories
@@ -14,37 +19,7 @@ namespace ThemePark.Tests.Repositories
         [Fact]
         public void RideRepository_GetRideByID_Valid_ID()
         {
-            // create in Memort Database 
-            var options = new DbContextOptionsBuilder<ThemeParkContext>()
-                    .UseInMemoryDatabase(databaseName: "ThemeParkDataBase")
-                    .Options;
-
-            using (var context = new ThemeParkContext(options))
-            {
-               
-
-                context.Rides.Add(new Ride
-                {
-                    ID = new Guid("9c941643-b050-40de-958c-b5e5e6a885af"),
-                    Name = "Teacups",
-                    Description = "Spinning ride in a big tea-cup ",
-                    ThrillFactor = 2,
-                    VomitFactor = 1
-                });
-
-                context.Rides.Add(new Ride
-                {
-                    ID = new Guid("e33c520a-3f9f-4256-bbc2-75e7c3bc352d"),
-                    Name = "Log Flume ",
-                    Description = "Boat ride with plenty of splashes",
-                    ThrillFactor = 3,
-                    VomitFactor = 2
-                });
-                context.SaveChanges();
-            }
-
-
-            using (var context = new ThemeParkContext(options))
+           using (var context = DatabaseFactory.CreateDbContext())
             {
                 RideRepository controller = new RideRepository(context);
                 var ride = controller.GetRideByID(new Guid("e33c520a-3f9f-4256-bbc2-75e7c3bc352d"));
@@ -59,37 +34,8 @@ namespace ThemePark.Tests.Repositories
         [Fact]
         public void RideRepository_GetAllRide()
         {
-            // create in Memort Database 
-            var options = new DbContextOptionsBuilder<ThemeParkContext>()
-                    .UseInMemoryDatabase(databaseName: "ThemeParkDataBase")
-                    .Options;
-
-            using (var context = new ThemeParkContext(options))
-            {
-
-
-                context.Rides.Add(new Ride
-                {
-                    ID = new Guid("9c941643-b050-40de-958c-b5e5e6a885af"),
-                    Name = "Teacups",
-                    Description = "Spinning ride in a big tea-cup ",
-                    ThrillFactor = 2,
-                    VomitFactor = 1
-                });
-
-                context.Rides.Add(new Ride
-                {
-                    ID = new Guid("e33c520a-3f9f-4256-bbc2-75e7c3bc352d"),
-                    Name = "Log Flume ",
-                    Description = "Boat ride with plenty of splashes",
-                    ThrillFactor = 3,
-                    VomitFactor = 2
-                });
-                context.SaveChanges();
-            }
-
-
-            using (var context = new ThemeParkContext(options))
+          
+            using (var context = DatabaseFactory.CreateDbContext())
             {
                 RideRepository controller = new RideRepository(context);
                 var rides = controller.GetAllRides();
@@ -98,5 +44,40 @@ namespace ThemePark.Tests.Repositories
             }
 
         }
+
+
+        [Fact]
+        public void RideRepository_GetSearchRide()
+        {
+
+            using (var context = DatabaseFactory.CreateDbContext())
+            {
+                RideParam searchparam = new RideParam { MinimumThrillFactor = 1 };
+
+                RideRepository controller = new RideRepository(context);
+                var rides = controller.SearchRide(searchparam);
+
+                Assert.Equal(2, rides.Count);
+            }
+
+        }
+
+
+        [Fact]
+        public void RideRepository_ThrowNotFoundException()
+        {
+
+            using (var context = DatabaseFactory.CreateDbContext())
+            {
+                
+
+                RideRepository controller = new RideRepository(context);
+                 
+                Assert.Throws<NotFoundException>(() => controller.GetRideByID(new Guid("d33c520a-3f9f-4256-bbc2-75e7c3bc352d")));
+            }
+
+        }
+
+
     }
 }

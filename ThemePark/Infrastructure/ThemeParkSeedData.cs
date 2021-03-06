@@ -5,7 +5,7 @@ using ThemePark.Models;
 
 namespace ThemePark.Infrastructure
 {
-    public static class GoldebVaultSeedData
+    public static class ThemeParkSeedData
     {
         public static void EnsureSeedData(this ThemeParkContext db)
         {

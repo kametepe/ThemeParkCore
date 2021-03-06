@@ -38,7 +38,7 @@ namespace ThemePark.Repositories.Implementations
 
         public List<Ride> SearchRide(RideParam param)
         {
-            throw new NotImplementedException();
+            return _context.Rides.Where(r => r.ThrillFactor >= param.MinimumThrillFactor).ToList<Ride>();
         }
  
     }
