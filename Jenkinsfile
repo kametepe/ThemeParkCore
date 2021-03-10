@@ -128,7 +128,7 @@ publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: true, r
                             nexusVersion: NEXUS_VERSION,
                             protocol: NEXUS_PROTOCOL,
                             nexusUrl: NEXUS_URL,
-                            groupId: 'ma.oncf.digital',
+                            groupId: 'com.digital-initiatives.digital',
                             version: VERSION,
                             repository: NEXUS_REPOSITORY,
                             credentialsId: NEXUS_CREDENTIAL_ID,
