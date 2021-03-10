@@ -61,26 +61,6 @@ stage('Build')
              
              
               withSonarQubeEnv('SonarQube') {
-         //  sh '/opt/sonar-scanner/bin/sonar-scanner -X -Dsonar.projectKey=ONCF-Train-WEB-API -Dsonar.sources=. -Dsonar.host.url=http://localhost:9000 -Dsonar.login=6d847cd833a31520cc84ddf1293879ddbcde6a42 -Dsonar.cs.opencover.reportsPaths=TrainNow.WebApi.Web.Test/coverage.opencover.xml -Dsonar.coverage.exclusions="**Test*.cs"'
-            //sh 'dotnet sonarscanner begin /k:"ONCFTrainNow"  /d:sonar.login="6d847cd833a31520cc84ddf1293879ddbcde6a42"'
-           //sh 'dotnet build'
-           //sh 'dotnet sonarscanner end  /d:sonar.login="6d847cd833a31520cc84ddf1293879ddbcde6a42"'
-           
-        //  sh 'dotnet test TrainNow.WebApi.Web.Test/TrainNow.WebApi.Web.Test.csproj /p:CollectCoverage=true /p:CoverletOutputFormat=opencover'
-//sh 'dotnet test TrainNow.WebApi.Web.Test/TrainNow.WebApi.Web.Test.csproj  --results-directory ./BuildReports/UnitTests /p:CollectCoverage=true /p:CoverletOutput=BuildReports/Coverage/ /p:CoverletOutputFormat=cobertura /p:Exclude="[xunit.*]*" '
-//sh 'dotnet test --logger "trx;LogFileName=TestResults.trx"  --results-directory ./BuildReports/UnitTests /p:CollectCoverage=true  /p:CoverletOutput=BuildReports/Coverage/ /p:CoverletOutputFormat=cobertura  /p:Exclude="[xunit.*]*" '
-//sh ' dotnet  build '
-//sh 'dotnet test --logger "trx;LogFileName=TestResults.trx"  --results-directory TrainNow.WebApi.Web.Test/BuildReports/UnitTests /p:CollectCoverage=true  /p:CoverletOutput=TrainNow.WebApi.Web.Test/BuildReports/Coverage/ /p:CoverletOutputFormat=opencover  /p:Exclude="[xunit.*]*" '
-
-// sh 'coverlet TrainNow.WebApi.Web.Test/bin/Debug/netcoreapp3.1/TrainNow.WebApi.Web.Test.dll --target dotnet --output TrainNow.WebApi.Web.Test/BuildReports/Coverage/ --format opencover'
-
-// sh 'reportgenerator -reports:TrainNow.WebApi.Web.Test/BuildReports/Coverage/coverage.opencover.xml -targetdir:TrainNow.WebApi.Web.Test/BuildReports/Coverage -reporttypes:"HTML;HTMLSummary"'
-// sh 'dotnet sonarscanner begin /k:ONCF-TRAIN-NOW-LATEST /d:sonar.host.url=http://localhost:9000 /d:sonar.login="6d847cd833a31520cc84ddf1293879ddbcde6a42" /d:sonar.cs.opencover.reportsPaths=TrainNow.WebApi.Web.Test/BuildReports/Coverage/coverage.opencover.xml /d:sonar.coverage.exclusions="**Test*.cs" '
-// sh ' dotnet  build '
-// sh ' dotnet sonarscanner end /d:sonar.login="6d847cd833a31520cc84ddf1293879ddbcde6a42" '
-
-
-//sh 'dotnet test TrainNow.WebApi.Web.Test/TrainNow.WebApi.Web.Test.csproj /p:CollectCoverage=true /p:CoverletOutputFormat=opencover'
 
 sh 'dotnet test --logger "trx;LogFileName=TestResults.trx"  --results-directory BuildReports/UnitTests /p:CollectCoverage=true  /p:CoverletOutput=BuildReports/Coverage /p:CoverletOutputFormat=opencover  /p:Exclude="[xunit.*]*" '
 
