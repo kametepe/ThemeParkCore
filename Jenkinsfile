@@ -1,122 +1,178 @@
-
-pipeline{
+pipeline {
+    agent any
     
-   agent any
-
-    
-    
-    environment{
-		NEXUS_VERSION = "nexus2"
+     environment {
+      
+     
+		
+        SCRIPTS_DIR ="C:\\Jenkins\\tools\\scripts"  
+        NUGET_DIR = "C:\\Jenkins\\tools\\nuget"
+		DOTCOVER_DIR = "C:\\Jenkins\\tools\\dotcover"
+		VSTEST_DIR = "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\Common7\\IDE\\CommonExtensions\\Microsoft\\TestWindow"
+        ZAPCLI_DIR = "C:\\python\\Scripts"
+		
+		
+		// This can be nexus3 or nexus2
+        NEXUS_VERSION = "nexus3"
         // This can be http or https
         NEXUS_PROTOCOL = "http"
         // Where your Nexus is running
-        NEXUS_URL = "artifacts.hikanosland.com/nexus"
+        NEXUS_URL = "localhost:8081"
         // Repository where we will upload the artifact
-        NEXUS_REPOSITORY = "repository-example"
+        NEXUS_REPOSITORY = "maven-releases"
         // Jenkins credential id to authenticate to Nexus OSS
         NEXUS_CREDENTIAL_ID = "nexus-credentails"
 		
         // set the build Version
 	    VERSION = "2.${java.time.LocalDate.now().getYear()}.${java.time.LocalDate.now().getDayOfYear().toString()}.${java.lang.String.format("%02d", java.time.LocalTime.now().getHour())}${java.lang.String.format("%02d", java.time.LocalTime.now().getMinute())}"
-    
-
-  
+       //VERSION = "2.15.248.47"
+      
     }
-    
-    stages{
-	     stage ('CLEAN WORKSPACE') {
+
+
+    stages { 
+        stage ('Clean workspace') {
           steps {
               cleanWs()
            }
         }
-        
         stage("CHECKOUT CODE") {
             steps {
                 script {
-                    // Let's clone the source                   
-					// https://github.com/kametepe/ThemeParkCore.git
-				    //git url: 'https://gitlab.com/kametepe/theme-park.git', branch: 'master', credentialsId: 'gitlab-credentails'
+                    // Let's clone the source
+
+				    git url: 'https://github.com/kametepe/ThemeParkCore.git', branch: 'master', credentialsId: 'gitlab-default'
                 }
             }
         }
 
-        
-       Stage('RESTORE'){
-            steps{
-                echo "*********************START RESTORE*********************"
-                sh "dotnet restore"
-            }
-        }
-        
-	    stage('Dependency Check') {
+          stage ('SCA : OWASP Dependency-Check Vulnerabilities') {
             steps {
                 dependencyCheck additionalArguments: '', odcInstallation: 'OWASP-Dependency-Checker'
                 dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
             }
-        }	
+        }
+
+stage('Build')
+      {
+          
+          
+         steps {
+             
+             
+              withSonarQubeEnv('SonarQube') {
+         //  sh '/opt/sonar-scanner/bin/sonar-scanner -X -Dsonar.projectKey=ONCF-Train-WEB-API -Dsonar.sources=. -Dsonar.host.url=http://localhost:9000 -Dsonar.login=6d847cd833a31520cc84ddf1293879ddbcde6a42 -Dsonar.cs.opencover.reportsPaths=TrainNow.WebApi.Web.Test/coverage.opencover.xml -Dsonar.coverage.exclusions="**Test*.cs"'
+            //sh 'dotnet sonarscanner begin /k:"ONCFTrainNow"  /d:sonar.login="6d847cd833a31520cc84ddf1293879ddbcde6a42"'
+           //sh 'dotnet build'
+           //sh 'dotnet sonarscanner end  /d:sonar.login="6d847cd833a31520cc84ddf1293879ddbcde6a42"'
+           
+        //  sh 'dotnet test TrainNow.WebApi.Web.Test/TrainNow.WebApi.Web.Test.csproj /p:CollectCoverage=true /p:CoverletOutputFormat=opencover'
+//sh 'dotnet test TrainNow.WebApi.Web.Test/TrainNow.WebApi.Web.Test.csproj  --results-directory ./BuildReports/UnitTests /p:CollectCoverage=true /p:CoverletOutput=BuildReports/Coverage/ /p:CoverletOutputFormat=cobertura /p:Exclude="[xunit.*]*" '
+//sh 'dotnet test --logger "trx;LogFileName=TestResults.trx"  --results-directory ./BuildReports/UnitTests /p:CollectCoverage=true  /p:CoverletOutput=BuildReports/Coverage/ /p:CoverletOutputFormat=cobertura  /p:Exclude="[xunit.*]*" '
+//sh ' dotnet  build '
+//sh 'dotnet test --logger "trx;LogFileName=TestResults.trx"  --results-directory TrainNow.WebApi.Web.Test/BuildReports/UnitTests /p:CollectCoverage=true  /p:CoverletOutput=TrainNow.WebApi.Web.Test/BuildReports/Coverage/ /p:CoverletOutputFormat=opencover  /p:Exclude="[xunit.*]*" '
+
+// sh 'coverlet TrainNow.WebApi.Web.Test/bin/Debug/netcoreapp3.1/TrainNow.WebApi.Web.Test.dll --target dotnet --output TrainNow.WebApi.Web.Test/BuildReports/Coverage/ --format opencover'
+
+// sh 'reportgenerator -reports:TrainNow.WebApi.Web.Test/BuildReports/Coverage/coverage.opencover.xml -targetdir:TrainNow.WebApi.Web.Test/BuildReports/Coverage -reporttypes:"HTML;HTMLSummary"'
+// sh 'dotnet sonarscanner begin /k:ONCF-TRAIN-NOW-LATEST /d:sonar.host.url=http://localhost:9000 /d:sonar.login="6d847cd833a31520cc84ddf1293879ddbcde6a42" /d:sonar.cs.opencover.reportsPaths=TrainNow.WebApi.Web.Test/BuildReports/Coverage/coverage.opencover.xml /d:sonar.coverage.exclusions="**Test*.cs" '
+// sh ' dotnet  build '
+// sh ' dotnet sonarscanner end /d:sonar.login="6d847cd833a31520cc84ddf1293879ddbcde6a42" '
+
+
+//sh 'dotnet test TrainNow.WebApi.Web.Test/TrainNow.WebApi.Web.Test.csproj /p:CollectCoverage=true /p:CoverletOutputFormat=opencover'
+
+sh 'dotnet test --logger "trx;LogFileName=TestResults.trx"  --results-directory BuildReports/UnitTests /p:CollectCoverage=true  /p:CoverletOutput=BuildReports/Coverage /p:CoverletOutputFormat=opencover  /p:Exclude="[xunit.*]*" '
+
+sh 'dotnet build-server shutdown'
+sh 'dotnet sonarscanner begin /k:THEME-PARK /d:sonar.host.url=http://localhost:9000 /d:sonar.login="6d847cd833a31520cc84ddf1293879ddbcde6a42" /d:sonar.cs.opencover.reportsPaths=ThemePark.Tests/BuildReports/Coverage.opencover.xml /d:sonar.coverage.exclusions=”**Test*.cs” '
+sh 'dotnet build'
+sh 'dotnet sonarscanner end /d:sonar.login="6d847cd833a31520cc84ddf1293879ddbcde6a42" '
+
+sh 'reportgenerator -reports:ThemePark.Tests/BuildReports/Coverage.opencover.xml -targetdir:ThemePark.Tests/BuildReports/Coverage -reporttypes:"HTML;HTMLSummary"'
+
+step([$class: 'MSTestPublisher', testResultsFile:"**/*.trx", failOnError: true, keepLongStdio: true])
+
+publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: true, reportDir: "ThemePark.Tests/BuildReports/Coverage", reportFiles: 'index.html', reportName: "CodeCoverage Report"])
+
+              }
+         }
+      }
+
+       stage("SAST : Quality Gate") {
+            steps {
+              timeout(time: 1, unit: 'MINUTES') {
+                waitForQualityGate abortPipeline: true
+              }
+                     
+            }
+          }
+
         
-        stage('Build and Set Dll Version ') {
+         stage('SAST Scann') {
+            steps {
+                echo 'Perform SAST scans'
+            }
+        }
+        
+         stage('Build ') {
             steps {
                 echo 'Perform Build'
-				bat "dotnet build --configuration Release /p:Version=1.2.3.4"
+                sh 'dotnet publish -c Release /p:configuration="release";platform="any cpu"'
             }
         }
         
-         stage("SAST :  SonarQube analysis") {
+         stage("ZIP ARTIFACTS ") {
             steps {
-                echo 'Unit test , Code Coverage and Perform Test Coverage with SonarQube'
+                script {
+              zip archive: true, dir: 'ThemePark/bin/Release/netcoreapp3.1/publish/', glob: '', zipFile: "ThemePark-${VERSION}.zip"
+                }
+         
+            }
+          }
+
+        
+         stage('Unit Tests') {
+            steps {
+                echo 'Perform Test Coverage'
             }
         }
-        stage('SAST : Quality Gate') {
+        
+      stage("PUBLISH TO NEXUS") {
             steps {
-                echo 'Check Quality Gate'
+                script {
+                    // Assign to a boolean response verifying If the artifact name exists
+                    artifactExists = fileExists "ThemePark-${VERSION}.zip";
+                    if(artifactExists) {
+                        nexusArtifactUploader(
+                            nexusVersion: NEXUS_VERSION,
+                            protocol: NEXUS_PROTOCOL,
+                            nexusUrl: NEXUS_URL,
+                            groupId: 'ma.oncf.digital',
+                            version: VERSION,
+                            repository: NEXUS_REPOSITORY,
+                            credentialsId: NEXUS_CREDENTIAL_ID,
+                            artifacts: [
+                                // Artifact generated such as .jar, .ear and .war files.
+                                [artifactId: 'ThemePark',
+                                classifier: '',
+                                file: "ThemePark-${VERSION}.zip",
+                                type: 'zip']
+                           
+                            ]
+                        );
+                    } else {
+                        error "*** File: ${artifactPath}, could not be found";
+                    }
+                }
             }
         }
-        stage ("DAST : Deploy Package") {
-            steps {
-                echo 'Push Artifacts to Remote Server'
-            }
-        }
+
         
          stage('DAST') {
             steps {
                 echo 'Perform DAST scanns'
             }
         }
-        
-		stage('Deploy Artifacts') {
-            steps {
-                echo 'Push Artifacts to Repository'
-            }
-        }
-        
-        stage('Last'){
-            steps{
-                echo "********************* ALL END*********************"
-            }
-        }
-        
-        
     }
-       
-    
-   post {
-        always {
-            echo 'One way or another, I have finished'
-            /*deleteDir()*/ /* clean up our workspace */
-        }
-        success {
-            echo 'I succeeeded!'
-        }
-        unstable {
-            echo 'I am unstable :/'
-        }
-        failure {
-            echo 'I failed :('
-        }
-        changed {
-            echo 'Things were different before...'
-        }
-    }
-    
 }
