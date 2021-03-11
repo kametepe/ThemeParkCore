@@ -3,8 +3,6 @@ using Moq;
 using ThemePark.Controllers;
 using ThemePark.Models;
 using ThemePark.Services.Interfaces;
-using System.Web.Http;
-using System.Web.Http.Results;
 using System.Collections.Generic;
 using Xunit;
 
