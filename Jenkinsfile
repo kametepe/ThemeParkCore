@@ -3,13 +3,6 @@ pipeline {
     
      environment {
       
-     
-		
-        SCRIPTS_DIR ="C:\\Jenkins\\tools\\scripts"  
-        NUGET_DIR = "C:\\Jenkins\\tools\\nuget"
-		DOTCOVER_DIR = "C:\\Jenkins\\tools\\dotcover"
-		VSTEST_DIR = "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\Common7\\IDE\\CommonExtensions\\Microsoft\\TestWindow"
-        ZAPCLI_DIR = "C:\\python\\Scripts"
 		
 		
 		// This can be nexus3 or nexus2
@@ -104,7 +97,43 @@ publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: true, r
             }
         }
         
-         stage("ZIP ARTIFACTS ") {
+
+          
+        stage('DAST : START Application') {
+        steps {
+            sh 'dotnet ThemePark/bin/Release/netcoreapp2.1/publish/ThemePark.dll --urls="http://localhost:8200;https://localhost:8201" & echo $! > ./api-themepark-pid.file & '
+            }
+        }      
+
+   stage ("DAST : OWASP ZAP ")
+{
+steps{
+// echo " DAST instruction "
+sh ''' zap-cli --api-key "unectf8suurfp25ot30q6tqsmn" -p "9292" session new '''
+timeout(time: 3, unit: 'MINUTES') {
+sh ''' zap-cli --api-key "unectf8suurfp25ot30q6tqsmn" -p "9292" -v quick-scan http://localhost:8200 '''
+}
+sh ''' zap-cli --api-key "unectf8suurfp25ot30q6tqsmn" -p "9292" report -o ZAP_Report.html -f html '''
+publishHTML (target: [
+allowMissing: false,
+alwaysLinkToLastBuild: false,
+keepAll: true,
+reportDir: '',
+reportFiles: "ZAP_Report.html",
+reportName: "ZAP Report"
+])
+}
+}
+        
+        stage('DAST : STOP Application') {
+        steps {
+sh '''#!/bin/bash
+kill $(cat ./api-themepark-pid.file)
+'''
+            }
+        }
+        
+                 stage("ZIP ARTIFACTS ") {
             steps {
                 script {
               zip archive: true, dir: 'ThemePark/bin/Release/netcoreapp2.1/publish/', glob: '', zipFile: "ThemePark-${VERSION}.zip"
@@ -112,12 +141,6 @@ publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: true, r
          
             }
           }
-
-       stage('DAST') {
-            steps {
-                echo 'Perform DAST scanns'
-            }
-        }
         
       stage("PUBLISH TO NEXUS") {
             steps {
