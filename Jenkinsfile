@@ -46,6 +46,12 @@ pipeline {
             }
         }
 
+      stage('RESTORE PACKAGES') {
+            steps {
+                sh 'dotnet restore'
+            }
+        }
+        
           stage ('SCA : OWASP Dependency-Check Vulnerabilities') {
             steps {
                 dependencyCheck additionalArguments: '', odcInstallation: 'OWASP-Dependency-Checker'
@@ -53,7 +59,7 @@ pipeline {
             }
         }
 
-stage('Build')
+stage('SAST : BUILD + UNIT TEST + CODE COVERAGE ')
       {
           
           
@@ -61,11 +67,11 @@ stage('Build')
              
              
               withSonarQubeEnv('SonarQube') {
-
+       
 sh 'dotnet test --logger "trx;LogFileName=TestResults.trx"  --results-directory BuildReports/UnitTests /p:CollectCoverage=true  /p:CoverletOutput=BuildReports/Coverage /p:CoverletOutputFormat=opencover  /p:Exclude="[xunit.*]*" '
 
 sh 'dotnet build-server shutdown'
-sh 'dotnet sonarscanner begin /k:THEME-PARK /d:sonar.host.url=http://localhost:9000 /d:sonar.login="6d847cd833a31520cc84ddf1293879ddbcde6a42" /d:sonar.cs.opencover.reportsPaths=ThemePark.Tests/BuildReports/Coverage.opencover.xml /d:sonar.coverage.exclusions=”**Test*.cs” '
+sh 'dotnet sonarscanner begin /k:THEME-PARK-CORE /d:sonar.host.url=http://localhost:9000 /d:sonar.login="6d847cd833a31520cc84ddf1293879ddbcde6a42" /d:sonar.cs.opencover.reportsPaths=ThemePark.Tests/BuildReports/Coverage.opencover.xml /d:sonar.coverage.exclusions=”**Test*.cs” '
 sh 'dotnet build'
 sh 'dotnet sonarscanner end /d:sonar.login="6d847cd833a31520cc84ddf1293879ddbcde6a42" '
 
@@ -79,7 +85,7 @@ publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: true, r
          }
       }
 
-       stage("SAST : Quality Gate") {
+       stage("SAST : QUALITY GATE") {
             steps {
               timeout(time: 1, unit: 'MINUTES') {
                 waitForQualityGate abortPipeline: true
@@ -89,13 +95,9 @@ publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: true, r
           }
 
         
-         stage('SAST Scann') {
-            steps {
-                echo 'Perform SAST scans'
-            }
-        }
+   
         
-         stage('Build ') {
+         stage('BUILD PACKAGE ') {
             steps {
                 echo 'Perform Build'
                 sh 'dotnet publish -c Release /p:configuration="release";platform="any cpu"'
@@ -111,10 +113,9 @@ publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: true, r
             }
           }
 
-        
-         stage('Unit Tests') {
+       stage('DAST') {
             steps {
-                echo 'Perform Test Coverage'
+                echo 'Perform DAST scanns'
             }
         }
         
@@ -128,7 +129,7 @@ publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: true, r
                             nexusVersion: NEXUS_VERSION,
                             protocol: NEXUS_PROTOCOL,
                             nexusUrl: NEXUS_URL,
-                            groupId: 'com.digital-initiatives.digital',
+                            groupId: 'ma.oncf.digital',
                             version: VERSION,
                             repository: NEXUS_REPOSITORY,
                             credentialsId: NEXUS_CREDENTIAL_ID,
@@ -149,10 +150,6 @@ publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: true, r
         }
 
         
-         stage('DAST') {
-            steps {
-                echo 'Perform DAST scanns'
-            }
-        }
+   
     }
 }
