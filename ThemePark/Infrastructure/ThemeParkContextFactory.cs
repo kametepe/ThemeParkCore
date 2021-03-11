@@ -22,8 +22,8 @@ namespace ThemePark.Infrastructure
             var optionsBuilder = new DbContextOptionsBuilder<ThemeParkContext>();
             string connection = _Configuration.GetConnectionString("ThemeParkConnection");
             optionsBuilder.UseSqlServer(connection);
-            // optionsBuilder.UseMySQL("Server=(localdb)\\mssqllocaldb;Database=ThemePark;Trusted_Connection=True;ConnectRetryCount=0");
-         
+            // optionsBuilder.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=ThemePark;Trusted_Connection=True;ConnectRetryCount=0");
+
             return new ThemeParkContext(optionsBuilder.Options);
         }
     }
